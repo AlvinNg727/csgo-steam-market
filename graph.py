@@ -3,7 +3,12 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 def animate(i):
-    data = pd.read_csv('price.csv')
+    while True:
+        try:
+            data = pd.read_csv('price.csv')
+            break
+        except:
+            pass
     data['DATE'] = pd.to_datetime(data['DATE'])
     x = data['DATE']
     y1 = data['LOWEST']
@@ -18,10 +23,10 @@ def animate(i):
     plt.tight_layout()
     plt.grid()
 
+def main():
+    ani = FuncAnimation(plt.gcf(), animate, interval=1000)
 
-ani = FuncAnimation(plt.gcf(), animate, interval=1000)
-
-plt.gcf().autofmt_xdate()
-plt.tight_layout()
-plt.grid()
-plt.show()
+    plt.gcf().autofmt_xdate()
+    plt.tight_layout()
+    plt.grid()
+    plt.show()
