@@ -16,14 +16,17 @@ def check_lowest_price(data):
 def main_loop(name):
     item_price_data = check_item_price(name)
     lowest_price = check_lowest_price(item_price_data)
-    if lowest_price > 6.5:
-        print(f"\n\n{lowest_price}\n\n")
+
+    with open("price.txt", "a") as f:
+        f.write(f"${lowest_price}\n")
+    if lowest_price > 6.22:
+        print(f"LARGER THAN 6.22: ${lowest_price}")
     else:
-        print(lowest_price)
+        print(f"${lowest_price}")
 
 def main():
     item_name = item_to_track()
-    schedule.every(5).minutes.do(main_loop, name=item_name)
+    schedule.every(5).seconds.do(main_loop, name=item_name)
     while True:
         schedule.run_pending()
         time.sleep(1)
