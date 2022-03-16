@@ -1,6 +1,9 @@
 import requests
 import schedule
 import time
+import os
+import csv
+#import graph
 
 def item_to_track():
     item_link = input("Link to steam community market for your item: ")
@@ -13,20 +16,52 @@ def check_item_price(market_name):
 def check_lowest_price(data):
     return float(data['lowest_price'][4:])
 
+def check_median_price(data):
+    return float(data['median_price'][4:])
+
+def check_file_size():
+    try:
+        if os.path.getsize("price.csv") >= 1048576:
+            return False
+        else:
+            return True
+    except:
+        print("Creating price csv...")
+        return 2
+
+def write_to_file(time, lowest_price, median_price):
+    file_size = check_file_size()
+
+    if file_size == 2:
+        with open("price.csv", "a", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["DATE", "LOWEST", "MEDIAN"])
+            writer.writerow([time, lowest_price, median_price])
+    elif file_size == False:
+        print("Resetting csv...")
+        with open("price.csv", "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["DATE", "LOWEST", "MEDIAN"])
+            writer.writerow([time, lowest_price, median_price])
+    elif file_size == True:
+        with open("price.csv", "a", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([time, lowest_price, median_price])
+
 def main_loop(name):
     item_price_data = check_item_price(name)
     lowest_price = check_lowest_price(item_price_data)
+    median_price = check_median_price(item_price_data)
 
-    with open("price.txt", "a") as f:
-        f.write(f"${lowest_price}\n")
-    if lowest_price > 6.22:
-        print(f"LARGER THAN 6.22: ${lowest_price}")
-    else:
-        print(f"${lowest_price}")
+    current_time = time.strftime("%Y %b %d %H:%M:%S")
+
+    write_to_file(current_time, lowest_price, median_price)
+
+    print(f"{current_time}  ${lowest_price}  ${median_price}")
 
 def main():
     item_name = item_to_track()
-    schedule.every(5).seconds.do(main_loop, name=item_name)
+    schedule.every(10).seconds.do(main_loop, name=item_name)
     while True:
         schedule.run_pending()
         time.sleep(1)
